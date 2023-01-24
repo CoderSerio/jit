@@ -1,0 +1,32 @@
+{
+  "name": "jit-cli",
+  "version": "1.0.0",
+  "description": "Git, but be refactored with JavaScript",
+  "main": "index.js",
+  "repository": "https://github.com/CoderSerio/jit.git",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "jit": "index.js"
+  },
+  "keywords": [
+    "JavaScript",
+    "Git",
+    "cli",
+    "commandline"
+  ],
+  "bugs": {
+    "url": "https://github.com/CoderSerio/jit/issues",
+    "email": "2779066456@qq.com"
+  },
+  "author": " <CoderSerio>(2779066456@qq.com)",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.2.0",
+    "commander": "^10.0.0",
+    "fs-extra": "^11.1.0",
+    "shelljs": "^0.8.5",
+    "terminal-kit": "^3.0.0"
+  }
+}
