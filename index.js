@@ -5,9 +5,10 @@ const init = require('./src/commands/init');
 const add = require('./src/commands/add');
 const commit = require('./src/commands/commit');
 const status = require('./src/commands/status');
-const rmChache = require('./src/commands/rm-cache');
+const rmCache = require('./src/commands/rm-cache');
 const log = require('./src/commands/log');
-const clone = require('./src/commands/clone')
+const { prompt, emphasize } = require('./src/utils/notice');
+// const clone = require('./src/commands/clone');
 
 // handle the command
 program
@@ -40,10 +41,10 @@ program
   });
 
 program
-  .command('rm-chache')
+  .command('rm-cache')
   .description('clear the storage')
   .action((options) => {
-    rmChache(options);
+    rmCache(options);
   });
 
 program
@@ -53,17 +54,17 @@ program
     log(options);
   });
 
-program
-  .command('clone')
-  .description('clone program to localhost from the remote')
-  .argument('<string>', 'the remote repository url')
-  .action((str) => {
-    clone(str);
-  });
+// program
+//   .command('clone')
+//   .description('clone program to localhost from the remote')
+//   .argument('<string>', 'the remote repository url')
+//   .action((str) => {
+//     clone(str);
+//   });
 
 program
   .version(pkg.version)
-  .option('-test', 'just a test command')
-
+  .description(`${prompt('Jit',
+    `\nMore features will be supported soon... \nRecent plan is adjust the storage structure to make it more suitable for JavaScript.\nWelcome to come up with more ideas and join us: ${emphasize('https://github.com/CoderSerio/jit')}`)}`)
 
 program.parse(process.argv);

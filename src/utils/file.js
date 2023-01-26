@@ -78,7 +78,7 @@ function SHA1(sIn) {
   return SHA1Value.toUpperCase();
 }
 
-function getJitPath () {
+function getJitPath() {
   let lastPath = '';
   let currentPath = process.cwd();
   while (true) {
@@ -108,16 +108,16 @@ function deCompress(data) {
 function readFile(path, isSafe = false) {
   // 保证存在的情况下就不做校验, 提高效率
   let isExsited = true,
-      isFile = true;
+    isFile = true;
   if (!isSafe) {
     isExsited = fs.existsSync(path);
     isFile = isExsited ? fs.statSync(path).isFile() : false;
   }
-  const res = isExsited && isFile ? fs.readFileSync(path, 'utf-8').toString() : '';  
+  const res = isExsited && isFile ? fs.readFileSync(path, 'utf-8').toString() : '';
   return res;
 }
 
-function writeFile (path, fileContent, mode = 'w') {
+function writeFile(path, fileContent, mode = 'w') {
   fs.open(path, mode, (err, file) => {
     if (err) {
       console.error(err);
@@ -142,5 +142,5 @@ module.exports = {
   getJitPath,
   readFile,
   writeFile,
-  SHA1
+  SHA1,
 };

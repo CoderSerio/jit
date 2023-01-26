@@ -1,5 +1,6 @@
-const shell = require('shelljs');
+// const shell = require('shelljs');
+const { info } = require('../utils/notice');
 
 module.exports = (url) => {
-    console.log('[clone]: this feature will be supported soon!');
+    console.log(info('clone', 'this feature will be supported someday.'));
 }

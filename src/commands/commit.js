@@ -1,8 +1,9 @@
 const fileTool = require('../utils/file')
 const path = require('path');
 const fs = require('fs-extra');
+const { error, warn, emphasize } = require('../utils/notice');
 
-// 为tree节点生成hashID, 顺便压缩其content
+// generate hashID for the tree objects, and compres the content of files
 function getHashID(treeObject) {
   let content = '';
   treeObject.content.forEach((child) => {
@@ -14,15 +15,15 @@ function getHashID(treeObject) {
   return HashID;
 }
 
-// 读取暂存区, 构建映射表
-function getHash2PathMap (jitPath) {
-  const hash2path = {}; 
+// read the storage, build hash-path map
+function getHash2PathMap(jitPath) {
+  const hash2path = {};
   const storagePath = path.resolve(jitPath, './.jit/index');
 
   const storageContentLines = fileTool.readFile(storagePath).split('\n');
-  storageContentLines.pop(); // 末尾会多余的空行
+  storageContentLines.pop(); // extra line
   storageContentLines.forEach((line) => {
-    const hashID = line.slice(0, 40); // SHA-1摘要固定长度40
+    const hashID = line.slice(0, 40); // the length of the res of the SHA-1 is 40
     const filePath = line.slice(41);
     hash2path[hashID] = filePath;
   });
@@ -31,18 +32,18 @@ function getHash2PathMap (jitPath) {
 
 function getTreeObjects(jitPath, hash2path) {
   const objectsPath = path.resolve(jitPath, './.jit/objects');
-  // 读取本地仓库区, 构建文件树
-  // 不可以直接遍历根目录, 因为commit是需要以暂存区内容为前提的, 必须按照映射表的内容来
+  // read the objects, build file tree
+  // and commit record is based on the storage 
   const fileTree = {};
   const fileTreeIndexs = [];
   const fileObjs = fs.readdirSync(objectsPath);
-  
-  // 将blob节点挂到父级tree节点
+
+  // make blob object node linked to its parent tree object node
   fileObjs.forEach((hashID) => {
     const filePath = hash2path[hashID];
-    if (filePath) { // 排除非映射表内的节点
+    if (filePath) { // filter the non-storage node
       const objectPath = path.resolve(objectsPath, hashID);
-      const type = fileTool.readFile(objectPath, true).split(' ')[0]; 
+      const type = fileTool.readFile(objectPath, true).split(' ')[0];
       const treeObjectFilePath = path.resolve(filePath, '..');
 
       if (!fileTree[treeObjectFilePath]) {
@@ -51,7 +52,7 @@ function getTreeObjects(jitPath, hash2path) {
           content: [],
         };
       }
-      
+
       fileTree[treeObjectFilePath].content.push({
         type,
         hashID,
@@ -63,12 +64,13 @@ function getTreeObjects(jitPath, hash2path) {
       }
     }
   });
-  
-  // 自底向上构建tree
-  // 逆序遍历能保证从叶子节点开始
-  for (let i = fileTreeIndexs.length - 1; i >= 0; i --) {
+
+  // from bottom to top, buiding the tree
+  // traversing in reverse order make it start from the leaf blob node
+  // ( empty folders are ignored )  
+  for (let i = fileTreeIndexs.length - 1; i >= 0; i--) {
     const treeObjectFilePath = fileTreeIndexs[i];
-    
+
     const hashID = getHashID(fileTree[treeObjectFilePath]);
     fileTree[treeObjectFilePath].hashID = hashID;
 
@@ -80,7 +82,7 @@ function getTreeObjects(jitPath, hash2path) {
 
     // 将子节点呈递给父节点
     if (treeObjectFilePath !== jitPath) {
-      const parentFilePath = path.resolve(treeObjectFilePath, '..'); 
+      const parentFilePath = path.resolve(treeObjectFilePath, '..');
       if (!fileTree[parentFilePath]) {
         fileTree[parentFilePath] = {
           hashID: '',
@@ -90,7 +92,7 @@ function getTreeObjects(jitPath, hash2path) {
       fileTree[parentFilePath]?.content.push(treeObject);
     }
   }
-  
+
   return [fileTree, fileTreeIndexs];
 }
 
@@ -100,10 +102,11 @@ function writeCommitRecord(jitPath, rootHashID, msg) {
   const headPath = path.resolve(jitPath, './.jit/HEAD');
 
   const lastRootHashID = fileTool.readFile(headPath);
-  const previousCommitHashID = lastRootHashID ? lastRootHashID : '0'.repeat(40); // 默认为首次commit
-  
-  if (previousCommitHashID === rootHashID) { // 避免同样的内容重复提交导致链表出现回环
-    console.error('[commit] Error: nothing changed to commit!');
+  const previousCommitHashID = lastRootHashID ? lastRootHashID : '0'.repeat(40); // first commit by default
+
+  if (previousCommitHashID === rootHashID) { //  avoid commit the same content to make the list loop back
+    const msg = error('commit', 'noting changed to commit')
+    console.error(msg);
     return;
   }
 
@@ -116,17 +119,20 @@ function writeCommitRecord(jitPath, rootHashID, msg) {
 
 module.exports = (options) => {
   if (!options?.msg) {
-    console.error('[commit]: Error: no message text!');
+    const msg = error('commit', `no message text. please run ${emphasize('jit commit -m <string>')} !`);
+    console.error(msg);
     return;
   }
   const jitPath = fileTool.getJitPath();
   if (!jitPath) {
-    console.log('[commit] Error: the dir .jit not found. please run `jit init` first !');
+    const msg = error('commit', `the dir ${emphasize('.jit')} not found. please run ${emphasize('jit init')} first !`);
+    console.error(msg);
     return;
   }
   const hash2path = getHash2PathMap(jitPath);
   if (!Object.keys(hash2path).length) {
-    console.log('[commit] Warn: nothing to commit!');
+    const msg = warn('commit', 'nothing to commit!');
+    console.warn(msg);
     return;
   }
 

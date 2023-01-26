@@ -1,11 +1,12 @@
 const fs = require('fs-extra');
 const path = require('path');
 const fileTool = require('../utils/file');
+const { error, emphasize } = require('../utils/notice');
 
-function getBlobObjects (rootPath) {
+function getBlobObjects(rootPath) {
   const blobObjs = [];
-  
-  function getter (path) {
+
+  function getter(path) {
     const items = fs.readdirSync(path);
     items.forEach((itemName) => {
       if (itemName !== '.jit') {
@@ -14,7 +15,7 @@ function getBlobObjects (rootPath) {
         const isFile = status.isFile();
         const isDir = status.isDirectory();
         if (isFile) {
-          const fileContent = fileTool.readFile(filePath, true); 
+          const fileContent = fileTool.readFile(filePath, true);
           const hashID = fileTool.SHA1(fileContent);
           const compressedContent = fileTool.compress(fileContent);
           blobObjs.push({
@@ -37,20 +38,21 @@ function getBlobObjects (rootPath) {
 module.exports = () => {
   const jitPath = fileTool.getJitPath();
   if (!jitPath) {
-    console.log('[add] Error: the dir .jit not found. please run `jit init` first !');
+    const msg = error('add', `the dir .jit not found. please run ${emphasize('jit init')} first !`);
+    console.error(msg);
     return;
   }
-  
+
   const blobObjs = getBlobObjects(jitPath);
   let storageContent = '';
   blobObjs?.forEach((blobObj) => {
-    // 创建blob objects文件
+    // create blob objects files
     const objectPath = path.resolve(jitPath, `./.jit/objects/${blobObj.hashID}`);
     fileTool.writeFile(objectPath, `blob ${blobObj.content}`);
-    // 拼接缓存区内容
+    // concat the content of storage
     storageContent += `${blobObj.hashID} ${blobObj.path}\n`;
   });
-  // 写入缓存区
+  // write into the storage
   const storagePath = path.resolve(jitPath, './.jit/index');
   fileTool.writeFile(storagePath, storageContent);
 }

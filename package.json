@@ -1,6 +1,6 @@
 {
   "name": "jit-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Git, but be refactored with JavaScript",
   "main": "index.js",
   "repository": "https://github.com/CoderSerio/jit.git",
@@ -23,7 +23,7 @@
   "author": " <CoderSerio>(2779066456@qq.com)",
   "license": "MIT",
   "dependencies": {
-    "chalk": "^5.2.0",
+    "chalk": "^4.1.2",
     "commander": "^10.0.0",
     "fs-extra": "^11.1.0",
     "shelljs": "^0.8.5",
