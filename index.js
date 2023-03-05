@@ -8,7 +8,7 @@ const status = require('./src/commands/status');
 const rmCache = require('./src/commands/rm-cache');
 const log = require('./src/commands/log');
 const { prompt, emphasize } = require('./src/utils/notice');
-// const clone = require('./src/commands/clone');
+const clone = require('./src/commands/clone');
 
 // handle the command
 program
@@ -54,17 +54,18 @@ program
     log(options);
   });
 
-// program
-//   .command('clone')
-//   .description('clone program to localhost from the remote')
-//   .argument('<string>', 'the remote repository url')
-//   .action((str) => {
-//     clone(str);
-//   });
+program
+  .command('clone')
+  .description('clone program to localhost from the remote')
+  .argument('<string>', 'the remote repository url')
+  .option('--mode <string>', 'valid param options: jit(default), git')
+  .action((str, option) => {
+    clone(str, option);
+  });
 
 program
   .version(pkg.version)
   .description(`${prompt('Jit',
-    `\nMore features will be supported soon... \nRecent plan is adjust the storage structure to make it more suitable for JavaScript.\nWelcome to come up with more ideas and join us: ${emphasize('https://github.com/CoderSerio/jit')}`)}`)
+    `\nMore features will be supported soon... \nRecent plan is adjust the storage structure to make it more suitable for JavaScript.\nFeedback more ideas or issues: ${emphasize('https://github.com/CoderSerio/jit')}`)}`);
 
 program.parse(process.argv);

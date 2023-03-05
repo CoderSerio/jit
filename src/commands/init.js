@@ -7,19 +7,20 @@ module.exports = () => {
   const jitPath = fileTool.getJitPath(rootPath);
 
   if (jitPath) {
-    const msg = error('init', `the dir ${emphasize('.jit')} already exists on ${jitPath}`)
+    const msg = error('init', `the dir ${emphasize('.jit')} already exists on ${jitPath}`);
     console.error(msg);
     return;
   }
 
-  const msg = prompt('init', `repository is initialized on ${emphasize(rootPath)}`);
+  const msg = prompt('init', `repository is initialized on ${emphasize(rootPath)} 🎉`);
   console.log(msg);
 
   async function initFiles() {
-    fs.ensureDir(`${rootPath}/.jit/objects`);
-    fs.ensureFile(`${rootPath}/.jit/index`);
-    fs.ensureFile(`${rootPath}/.jit/HEAD`);
-    fs.ensureFile(`${rootPath}/.jit/logs/HEAD`);
+    fs.ensureDir(`${rootPath}/.jit/objects`); // the local repository area
+    fs.ensureFile(`${rootPath}/.jit/index`); // the index area
+    fs.ensureFile(`${rootPath}/.jit/logs/HEAD`); // records all versions of the current branch
+    fs.ensureFile(`${rootPath}/.jit/logs/refs`); // includes all the branchs
+    fs.ensureFile(`${rootPath}/.jit/HEAD`); // records the current version(commit object's hashID)
   }
 
   (async () => {
@@ -30,4 +31,4 @@ module.exports = () => {
       console.error(msg);
     }
   })();
-}
+};

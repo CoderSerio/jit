@@ -6,7 +6,7 @@ const { green } = require('chalk');
 
 const endHashID = '0'.repeat(40);
 
-// build a list with map, hashID -> commit
+// build a list with the map, hashID -> commit
 function getHash2Record(jitPath) {
   const logsPath = path.resolve(jitPath, './.jit/logs/HEAD');
   const records = fileTool.readFile(logsPath).split('\n');
@@ -57,4 +57,4 @@ module.exports = () => {
     }
   }
   console.log('\n===== =========== =====');
-}
+};

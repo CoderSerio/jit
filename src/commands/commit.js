@@ -1,4 +1,4 @@
-const fileTool = require('../utils/file')
+const fileTool = require('../utils/file');
 const path = require('path');
 const fs = require('fs-extra');
 const { error, warn, emphasize } = require('../utils/notice');
@@ -8,7 +8,7 @@ function getHashID(treeObject) {
   let content = '';
   treeObject.content.forEach((child) => {
     content += `${child.type} ${child.hashID} ${child.path}\n`;
-  })
+  });
   // 格式化并压缩
   treeObject.content = fileTool.compress(content);
   const HashID = fileTool.SHA1(content);
@@ -66,8 +66,8 @@ function getTreeObjects(jitPath, hash2path) {
   });
 
   // from bottom to top, buiding the tree
-  // traversing in reverse order make it start from the leaf blob node
-  // ( empty folders are ignored )  
+  // traversing in reverse order makes it start from the leaf blob node
+  // ( empty folders will be ignored )  
   for (let i = fileTreeIndexs.length - 1; i >= 0; i--) {
     const treeObjectFilePath = fileTreeIndexs[i];
 
@@ -80,14 +80,14 @@ function getTreeObjects(jitPath, hash2path) {
       path: treeObjectFilePath,
     };
 
-    // 将子节点呈递给父节点
+    // exposing one child node to parent its parent node 
     if (treeObjectFilePath !== jitPath) {
       const parentFilePath = path.resolve(treeObjectFilePath, '..');
       if (!fileTree[parentFilePath]) {
         fileTree[parentFilePath] = {
           hashID: '',
           content: [],
-        }
+        };
       }
       fileTree[parentFilePath]?.content.push(treeObject);
     }
@@ -105,7 +105,7 @@ function writeCommitRecord(jitPath, rootHashID, msg) {
   const previousCommitHashID = lastRootHashID ? lastRootHashID : '0'.repeat(40); // first commit by default
 
   if (previousCommitHashID === rootHashID) { //  avoid commit the same content to make the list loop back
-    const msg = error('commit', 'noting changed to commit')
+    const msg = error('commit', 'noting changed to commit');
     console.error(msg);
     return;
   }
@@ -113,8 +113,8 @@ function writeCommitRecord(jitPath, rootHashID, msg) {
   const record = `${previousCommitHashID} ${rootHashID} ${new Date()} ${msg}\n`;
 
   fileTool.writeFile(logsPath, record, 'a');
-  fileTool.writeFile(headPath, rootHashID); // 覆盖.jit/HEAD
-  fileTool.writeFile(storagePath, ''); // 覆盖.jit/index
+  fileTool.writeFile(headPath, rootHashID); // overwirte the .jit/HEAD
+  fileTool.writeFile(storagePath, ''); // overwrite the .jit/index
 }
 
 module.exports = (options) => {
@@ -123,12 +123,14 @@ module.exports = (options) => {
     console.error(msg);
     return;
   }
+
   const jitPath = fileTool.getJitPath();
   if (!jitPath) {
     const msg = error('commit', `the dir ${emphasize('.jit')} not found. please run ${emphasize('jit init')} first !`);
     console.error(msg);
     return;
   }
+
   const hash2path = getHash2PathMap(jitPath);
   if (!Object.keys(hash2path).length) {
     const msg = warn('commit', 'nothing to commit!');
@@ -138,12 +140,14 @@ module.exports = (options) => {
 
   const objectsPath = path.resolve(jitPath, './.jit/objects');
   const [treeObjects, treeObjectsIndex] = getTreeObjects(jitPath, hash2path);
+
   treeObjectsIndex.forEach((fileIndex) => {
     const treeObject = treeObjects[fileIndex];
     const hashID = treeObject.hashID;
     const content = `tree ${treeObject.content}`;
     fileTool.writeFile(`${objectsPath}/${hashID}`, content);
   });
+
   const rootHashID = treeObjects[jitPath].hashID;
   writeCommitRecord(jitPath, rootHashID, options.msg);
 };

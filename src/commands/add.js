@@ -27,7 +27,7 @@ function getBlobObjects(rootPath) {
           return getter(filePath);
         }
       }
-    })
+    });
   }
 
   getter(rootPath);
@@ -55,4 +55,4 @@ module.exports = () => {
   // write into the storage
   const storagePath = path.resolve(jitPath, './.jit/index');
   fileTool.writeFile(storagePath, storageContent);
-}
+};
